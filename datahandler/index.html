@@ -1,0 +1,138 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Handler</title>
+    <style>
+        ul {
+            max-height: 40%;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+            list-style: none;
+        }
+
+        ul li {
+            display: flex;
+            align-items: center;
+        }
+
+        ul li .icon {
+            margin-right: 10px;
+        }
+
+        button {
+            margin-top: 10px;
+        }
+
+        textarea {
+            width: 200px;
+            height: 30px;
+            margin-right: 10px;
+        }
+
+        .div1 {
+            margin: 10px;
+        }
+
+        .red {
+            background-color: red;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+        }
+    </style>
+    <script>
+        async function getOutlines() {
+            const url = '/outlines';
+            var model = document.getElementById('outlinesmodel').value;
+            var query = document.getElementById('outlinesquery').value;
+            var form = document.getElementById('outlinesform').value;
+
+            if (!model) {
+                model = 'llama3.2:3b';
+            }
+            if (!query) {
+                query = 'Are you active?';
+            }
+            if (!form) {
+                form = `{
+                    "$defs": {
+                        "Status": {
+                            "enum": ["success", "failure"],
+                            "title": "Status",
+                            "type": "string"
+                        }
+                    },
+                    "properties": {
+                        "status": {
+                            "$ref": "#/$defs/Status"
+                        },
+                        "response": {
+                            "type": "string"
+                        }
+                    },
+                    "required": ["status", "response"],
+                    "title": "Structured Response",
+                    "type": "object"
+                }`;
+            }
+
+            form = JSON.parse(form.trim());
+            
+            console.log('Model:', model);
+            console.log('Query:', query);
+            console.log('Form:', form);
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    model: model,
+                    query: query,
+                    form: form
+                })
+            });
+            const data = await response.json();
+            const outlinesResponse = document.getElementById('outlinesresponse');
+            outlinesResponse.appendChild(document.createTextNode(JSON.stringify(data, null, 2)));
+        }
+
+        window.onload = listFiles;
+
+    </script>
+</head>
+
+<body>
+    <h2>Outlines generated</h2>
+    <textarea id="outlinesmodel" placeholder="llama3.2:3b"></textarea>
+    <textarea id="outlinesquery" placeholder="Enter query"></textarea>
+    <textarea id="outlinesform" placeholder="{
+    '$defs': {
+        'Status': {
+            'enum': ['success', 'failure'],
+            'title': 'Status',
+            'type': 'string'
+        }
+    },
+    'properties': {
+        'status': {
+            '$ref': '#/$defs/Status'
+        },
+        'response': {
+            'type': 'string'
+        }
+    },
+    'required': ['status', 'response'],
+    'title': 'Structured Response',
+    'type': 'object'
+}"></textarea>
+    <button onclick="getOutlines()">Get Outlines</button>
+    <div id="outlinesresponse"></div>
+</body>
+
+</html>
