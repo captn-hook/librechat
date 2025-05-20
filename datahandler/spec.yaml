@@ -38,6 +38,29 @@ paths:
                 type: object
         '400':
           description: Bad request.
+  /summary:
+    post:
+      summary: Generate a summary of provided text.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                query:
+                  type: string
+                  description: The text body to summarize.
+                  example: README for API, This document is a summary of the API. 
+      responses:
+        '200':
+          description: Successful response with the generated summary.
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          description: Bad request.
   /upload:
     post:
       summary: Upload a file and process it.

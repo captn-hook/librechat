@@ -27,7 +27,7 @@ import os
 
 
 client = AsyncOpenAI(
-    base_url="http://localhost:11434/v1",
+    base_url="http://host.docker.internal:11434/v1",
     api_key='ollama',
 )
 
@@ -56,6 +56,44 @@ example_schema = """{
     "required": ["status", "response"],
     "title": "Structured Response",
     "type": "object"
+}"""
+
+summary_schema = """{
+    "$defs": {
+        "Section": {
+            "type": "object",
+            "properties": {
+                "title": {
+                    "type": "string"
+                },
+                "content": {
+                    "type": "string"
+                }
+            },
+            "required": ["title", "content"]
+        }
+    },
+    "properties": {
+        "title": {
+            "type": "string"
+        },
+        "executive_summary": {
+            "type": "string"
+        },
+        "sections": {
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/Section"
+            }
+        },
+        "conclusion": {
+            "type": "string"
+        }
+    },
+    "required": ["title", "sections"],
+    "title": "Document",
+    "type": "object",
+    "description": "A structured representation of a document with sections and an executive summary."
 }"""
 
 file_schema = """{
@@ -145,11 +183,17 @@ def outlines_request(query, model='llama3.2:3b', form=example_schema):
     
     if isinstance(form, dict):
         form = json.dumps(form)
-
-    generator = generate.json(get_model(model), form)
-    result = generator(query)
-    print(result, file=sys.stderr)
-    return result
+    try:
+        generator = generate.json(get_model(model), form)
+        result = generator(query)
+        print(result, file=sys.stderr)
+        return result
+    except Exception as e:
+        print(f"Error generating response: {e}", file=sys.stderr)
+        return {
+            "status": "failure",
+            "response": f"Error generating response: {e}"
+        }
 
 def file_handler(file):
 
@@ -191,8 +235,6 @@ def outlines_routes(app):
     @app.route('/outlines', methods=['POST'])
     def outlines_route():
         
-        print(request.json, file=sys.stderr)
-        
         query = request.json.get('query', 'Are you there?')
         model = request.json.get('model', 'llama3.2:3b')
         form = request.json.get('form', example_schema)        
@@ -202,7 +244,20 @@ def outlines_routes(app):
         print(response, file=sys.stderr)
 
         return jsonify(response)
+    
+    @app.route('/summary', methods=['POST'])
+    def summary_route():
         
+        query = request.json.get('query', 'Summarize this file.')
+        model = 'llama3.2:3b'
+        form = summary_schema
+        
+        response = outlines_request(query, model, form)
+        
+        print(response, file=sys.stderr)
+        
+        return jsonify(response)
+    
     @app.route('/upload', methods=['POST'])
     def upload_file():
 
