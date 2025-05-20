@@ -1,0 +1,110 @@
+openapi: 3.0.3
+info:
+  title: Outlines API
+  description: API for handling outlines, file uploads, and home inspection summaries.
+  version: 1.0.0
+servers:
+  - url: http://datahandler2:5000
+    description: Local server
+paths:
+  /outlines:
+    post:
+      summary: Generate outlines based on a query.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                query:
+                  type: string
+                  description: The query to process.
+                  example: Are you there?
+                model:
+                  type: string
+                  description: The model to use for processing.
+                  example: llama3.2:3b
+                form:
+                  type: object
+                  description: The schema for the query.
+                  example: {}
+      responses:
+        '200':
+          description: Successful response with the generated outline.
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          description: Bad request.
+  /upload:
+    post:
+      summary: Upload a file and process it.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: The file to upload.
+                query:
+                  type: string
+                  description: The query to process.
+                  example: Summarize this file.
+                model:
+                  type: string
+                  description: The model to use for processing.
+                  example: llama3.2:3b
+                form:
+                  type: object
+                  description: The schema for the query.
+                  example: {}
+      responses:
+        '200':
+          description: Successful response with the processed file result.
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          description: Bad request, such as missing file.
+  /home:
+    post:
+      summary: Process a home inspection file.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: The home inspection file to upload.
+                query:
+                  type: string
+                  description: The query to process.
+                  example: Summarize this home inspection.
+                model:
+                  type: string
+                  description: The model to use for processing.
+                  example: llama3.2:3b
+                form:
+                  type: object
+                  description: The schema for the query.
+                  example: {}
+      responses:
+        '200':
+          description: Successful response with the processed home inspection result.
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          description: Bad request, such as missing file.

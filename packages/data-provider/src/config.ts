@@ -565,6 +565,7 @@ export type TStartupConfig = {
 
 export enum OCRStrategy {
   MISTRAL_OCR = 'mistral_ocr',
+  TIKA_OCR = 'tika_ocr',
   CUSTOM_OCR = 'custom_ocr',
 }
 

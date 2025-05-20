@@ -1,0 +1,32 @@
+# For more information, see the Configuration Guide:
+# https://www.librechat.ai/docs/configuration/librechat_yaml
+
+# Configuration version (required)
+version: 1.1.5
+
+# Cache settings: Set to true to enable caching
+cache: true
+
+# Definition of custom endpoints
+endpoints:
+  custom:
+    - name: "ollama"
+      apiKey: "ollama"
+      baseURL: "http://host.docker.internal:11434/v1/"
+      models:
+        default:
+          [
+            "llama3.2:3b",
+          ]
+        fetch: false
+      titleConvo: true
+      titleModel: "current_model"
+      summarize: false
+      summaryModel: "current_model"
+      forcePrompt: false
+      modelDisplayLabel: "Ollama"
+
+ocr:
+  apiKey: "na"
+  baseURL: "http://tika2:9998/tika"
+  strategy: "tika_ocr"
